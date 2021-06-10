@@ -1,6 +1,7 @@
 from typing import Union
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pymc3 as pm
 import numpy as np
 import pandas as pd
@@ -9,35 +10,52 @@ import pandas as pd
 class Image:
     def __init__(
             self,
-            title: str,
+            name: str,
+            suffix: str,
             image: np.ndarray,
     ):
-        self.title = title
+        self.name = name
+        self.suffix = suffix
         self.image = image
+
+    def save(
+            self,
+            path: Path,
+    ):
+        plt.imsave(path / f'{self.name}.{self.suffix}')
 
 
 class GCP:
     def __init__(
             self,
+            name: str,
+            suffix: str,
             gcp: pd.DataFrame,
     ):
+        self.name = name
+        self.suffix = suffix
         self.gcp = gcp
 
 
 class Wld:
     def __init__(
             self,
-            wld: np.ndarray,
+            name: str,
+            suffix: str,
+            wld: Union[np.ndarray, None],
     ):
         self.wld = wld
+        self.name = name
+        self.suffix = suffix
 
-    def to_wld(
+    def save(
             self,
             path: Path,
     ):
-        path = path / f'{self.name}.{self.suffix}.wld'
-        txt = '\n'.join(self.wld)
-        path.write_text(txt)
+        if self.wld is not None:
+            path = path / f'{self.name}.{self.suffix}.wld'
+            txt = '\n'.join(list(self.wld))
+            path.write_text(txt)
 
 
 class Region:
@@ -45,8 +63,8 @@ class Region:
             self,
             name: str,
             bbox: tuple,
-            beta: Union[None, np.ndarray],
-            wld: Union[None, Wld],
+            beta: Union[np.ndarray, None],
+            wld: Wld,
             image: Image,
             gcp: GCP,
     ):
@@ -61,19 +79,37 @@ class Region:
     def from_map(
             cls,
             name: str,
+            suffix: str,
             image: np.ndarray,
             gcp: pd.DataFrame,
     ):
-        image_ = Image(name, image)
-        gcp = GCP(gcp)
+        image_ = Image(
+            name=name,
+            suffix=suffix,
+            image=image,
+        )
+
+        gcp = GCP(
+            name=name,
+            suffix=suffix,
+            gcp=gcp,
+        )
+
         bbox = 0, 0, image.shape[2], image.shape[1]
+
+        wld = Wld(
+            name=name,
+            suffix=suffix,
+            wld=None,
+        )
+
         return cls(
             name=name,
             image=image_,
             gcp=gcp,
             bbox=bbox,
             beta=None,
-            wld=None,
+            wld=wld,
         )
 
     def to_map(self):
