@@ -22,11 +22,11 @@ def georeference(
         image=original_map,
         gcp=gcp,
     )
-    print(dir(full_map))
     region_builder = RegionBuilder(
         full_map,
         regions,
     )
+    region_builder.split_map()
 
     full_map.wld.save(data_dir)
 
@@ -34,7 +34,7 @@ def georeference(
 if __name__ == '__main__':
     data_dir = Path('../data')
     original_map = plt.imread(data_dir / 'plan_1802.jpg')
-    regions = pd.read_csv(data_dir / 'plan_1802.jpg.regions')
+    regions = pd.read_csv(data_dir / 'plan_1802.jpg.regions', index_col=0)
     points = pd.read_csv(data_dir / 'plan_1802.jpg.points')
 
     georeference(

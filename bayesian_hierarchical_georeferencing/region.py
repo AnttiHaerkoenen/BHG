@@ -36,6 +36,12 @@ class GCP:
         self.suffix = suffix
         self.gcp = gcp
 
+    def save(
+            self,
+            path: Path,
+    ):
+        self.gcp.to_csv(path / f'{self.name}.{self.suffix}')
+
 
 class Wld:
     def __init__(
@@ -64,7 +70,7 @@ class Region:
             name: str,
             bbox: tuple,
             beta: Union[np.ndarray, None],
-            wld: Wld,
+            wld: Union[Wld, None],
             image: Image,
             gcp: GCP,
     ):
@@ -112,8 +118,13 @@ class Region:
             wld=wld,
         )
 
-    def to_map(self):
-        pass
+    def to_map(
+            self,
+            path: Path,
+    ):
+        self.image.save(path)
+        self.wld.save(path)
+        self.gcp.save(path)
 
 
 if __name__ == '__main__':
