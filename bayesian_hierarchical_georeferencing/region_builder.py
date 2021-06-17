@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import matplotlib.pyplot as plt
 from PIL import Image
 
 from bayesian_hierarchical_georeferencing.region import Raster, GCP, Wld, Region
@@ -36,6 +37,7 @@ class RegionBuilder:
         for reg in self.region_data.itertuples():
             r, c, _ = self.full_map.raster.data.shape
             bbox = int(reg.x1), int(-reg.y1), int(reg.x2), int(-reg.y2)
+            print(bbox)
             if not all((
                     0 <= bbox[0] <= c,
                     0 <= bbox[2] <= c,
@@ -44,7 +46,11 @@ class RegionBuilder:
             )):
                 raise ValueError('Incorrect region bounds')
 
-            cropped = self.full_map.raster.image.crop(bbox)
+            # cropped = self.full_map.raster.image.copy().crop(bbox)
+            cropped = self.full_map.raster.data[bbox[1]: bbox[3], bbox[0]: bbox[2]]
+            plt.imshow(cropped)
+            plt.show()
+            #Tähän asti ok
             raster = Raster(
                 name=reg.name,
                 suffix=self.full_map.raster.suffix,

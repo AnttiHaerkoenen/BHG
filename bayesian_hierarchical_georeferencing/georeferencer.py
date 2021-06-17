@@ -36,7 +36,6 @@ def georeference(
 if __name__ == '__main__':
     data_dir = Path('../data')
     original_map = Image.open(data_dir / 'plan_1802.png')
-    print(original_map.size)
     regions = pd.read_csv(data_dir / 'plan_1802.jpg.regions', index_col=0)
     points = pd.read_csv(data_dir / 'plan_1802.jpg.points')
 

@@ -2,7 +2,6 @@ from typing import Union
 from pathlib import Path
 
 from PIL import Image
-import pymc3 as pm
 import numpy as np
 import pandas as pd
 
@@ -98,15 +97,12 @@ class Region:
             suffix=suffix,
             image=image,
         )
-
         gcp = GCP(
             name=name,
             suffix=suffix,
             gcp=gcp,
         )
-
         bbox = 0, 0, image.size[0], image.size[1]
-
         wld = Wld(
             name=name,
             suffix=suffix,
