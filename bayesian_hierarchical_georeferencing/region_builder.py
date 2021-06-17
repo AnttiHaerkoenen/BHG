@@ -1,6 +1,9 @@
-import pandas as pd
+from pathlib import Path
 
-from bayesian_hierarchical_georeferencing.region import Image, GCP, Wld, Region
+import pandas as pd
+from PIL import Image
+
+from bayesian_hierarchical_georeferencing.region import Raster, GCP, Wld, Region
 
 
 def gcp_in_bbox(
@@ -20,37 +23,61 @@ class RegionBuilder:
             self,
             full_map: Region,
             regions: pd.DataFrame,
+            path: Path,
     ):
         self.full_map = full_map
         self.region_data = regions
         self.regions = None
+        self.path = path
 
     def split_map(self):
         self.regions = []
-        for r in self.region_data.itertuples():
-            image = Image(
-                name=r.name,
-                suffix=self.full_map.image.suffix,
-                image=self.full_map.image.image[int(r.y2):int(r.y1), int(r.x2):int(r.x1)],
+
+        for reg in self.region_data.itertuples():
+            r, c, _ = self.full_map.raster.data.shape
+            bbox = int(reg.x1), int(-reg.y1), int(reg.x2), int(-reg.y2)
+            if not all((
+                    0 <= bbox[0] <= c,
+                    0 <= bbox[2] <= c,
+                    0 <= bbox[1] <= r,
+                    0 <= bbox[3] <= r,
+            )):
+                raise ValueError('Incorrect region bounds')
+
+            cropped = self.full_map.raster.image.crop(bbox)
+            raster = Raster(
+                name=reg.name,
+                suffix=self.full_map.raster.suffix,
+                image=cropped,
             )
             gcp = GCP(
-                name=r.name,
-                suffix=self.full_map.image.suffix,
+                name=reg.name,
+                suffix=self.full_map.raster.suffix,
                 gcp=gcp_in_bbox(
-                    (r.x1, r.y1, r.x2, r.y2),
+                    bbox,
                     self.full_map.gcp.gcp,
                 ),
             )
+            wld = Wld(
+                reg.name,
+                self.full_map.raster.suffix,
+                None,
+            )
             region = Region(
-                name=r.name,
-                bbox=(r.x1, r.y1, r.x2, r.y2),
-                image=image,
-                wld=None,
+                name=reg.name,
+                bbox=bbox,
+                raster=raster,
+                wld=wld,
                 beta=None,
                 gcp=gcp,
             )
             self.regions.append(region)
-        print(self.regions[0])
+
+        self.save_regions()
+
+    def save_regions(self):
+        for reg in self.regions:
+            reg.to_map(self.path)
 
     def apply_bhg(self):
         pass

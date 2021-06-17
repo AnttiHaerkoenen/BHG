@@ -1,18 +1,18 @@
 from typing import Union
 from pathlib import Path
 
-import matplotlib.pyplot as plt
+from PIL import Image
 import pymc3 as pm
 import numpy as np
 import pandas as pd
 
 
-class Image:
+class Raster:
     def __init__(
             self,
             name: str,
             suffix: str,
-            image: np.ndarray,
+            image: Image,
     ):
         self.name = name
         self.suffix = suffix
@@ -22,7 +22,11 @@ class Image:
             self,
             path: Path,
     ):
-        plt.imsave(path / f'{self.name}.{self.suffix}')
+        self.image.save(path / f'{self.name}.{self.suffix}')
+
+    @property
+    def data(self):
+        return np.array(self.image)
 
 
 class GCP:
@@ -70,15 +74,15 @@ class Region:
             name: str,
             bbox: tuple,
             beta: Union[np.ndarray, None],
-            wld: Union[Wld, None],
-            image: Image,
+            wld: Wld,
+            raster: Raster,
             gcp: GCP,
     ):
         self.name = name
         self.bbox = bbox
         self.beta = beta
         self.wld = wld
-        self.image = image
+        self.raster = raster
         self.gcp = gcp
 
     @classmethod
@@ -86,10 +90,10 @@ class Region:
             cls,
             name: str,
             suffix: str,
-            image: np.ndarray,
+            image: Image,
             gcp: pd.DataFrame,
     ):
-        image_ = Image(
+        raster = Raster(
             name=name,
             suffix=suffix,
             image=image,
@@ -101,7 +105,7 @@ class Region:
             gcp=gcp,
         )
 
-        bbox = 0, 0, image.shape[2], image.shape[1]
+        bbox = 0, 0, image.size[0], image.size[1]
 
         wld = Wld(
             name=name,
@@ -111,7 +115,7 @@ class Region:
 
         return cls(
             name=name,
-            image=image_,
+            raster=raster,
             gcp=gcp,
             bbox=bbox,
             beta=None,
@@ -122,9 +126,12 @@ class Region:
             self,
             path: Path,
     ):
-        self.image.save(path)
+        self.raster.save(path)
         self.wld.save(path)
         self.gcp.save(path)
+
+    def __str__(self):
+        return f'Region: {self.name}, bounds: {self.bbox}'
 
 
 if __name__ == '__main__':
