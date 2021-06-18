@@ -21,7 +21,11 @@ class Raster:
             self,
             path: Path,
     ):
-        self.image.save(path / f'{self.name}.{self.suffix}')
+        format_ = self.suffix if self.suffix != 'jpg' else 'jpeg'
+        self.image.save(
+            path / f'region_{self.name}.{self.suffix}',
+            format=format_,
+        )
 
     @property
     def data(self):
@@ -43,7 +47,7 @@ class GCP:
             self,
             path: Path,
     ):
-        self.gcp.to_csv(path / f'{self.name}.{self.suffix}')
+        self.gcp.to_csv(path / f'region_{self.name}.{self.suffix}.points')
 
 
 class Wld:

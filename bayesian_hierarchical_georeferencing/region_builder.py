@@ -37,7 +37,6 @@ class RegionBuilder:
         for reg in self.region_data.itertuples():
             r, c, _ = self.full_map.raster.data.shape
             bbox = int(reg.x1), int(-reg.y1), int(reg.x2), int(-reg.y2)
-            print(bbox)
             if not all((
                     0 <= bbox[0] <= c,
                     0 <= bbox[2] <= c,
@@ -46,11 +45,7 @@ class RegionBuilder:
             )):
                 raise ValueError('Incorrect region bounds')
 
-            # cropped = self.full_map.raster.image.copy().crop(bbox)
-            cropped = self.full_map.raster.data[bbox[1]: bbox[3], bbox[0]: bbox[2]]
-            plt.imshow(cropped)
-            plt.show()
-            #Tähän asti ok
+            cropped = self.full_map.raster.image.crop(bbox)
             raster = Raster(
                 name=reg.name,
                 suffix=self.full_map.raster.suffix,
@@ -86,9 +81,11 @@ class RegionBuilder:
             reg.to_map(self.path)
 
     def apply_bhg(self):
+        # todo
         pass
 
     def save_transform(self):
+        # todo
         pass
 
 
