@@ -4,17 +4,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from PIL import Image
 
-from bayesian_hierarchical_georeferencing.region import Raster, GCP, Wld, Region
+from bayesian_hierarchical_georeferencing.region import Raster, GCP, Projection, Region
 
 
 def gcp_in_bbox(
         bbox: tuple,
         gcp_data: pd.DataFrame,
 ):
-    x_min, y_max, x_max, y_min = bbox
+    x_min, y_min, x_max, y_max = bbox
     in_box = [
         r for r in gcp_data.itertuples()
-        if ((x_min <= r.pixelX <= x_max) and (y_min <= r.pixelY <= y_max))
+        if ((x_min <= r.pixelX <= x_max) and (y_min <= -r.pixelY <= y_max))
     ]
     return pd.DataFrame(in_box)
 
@@ -59,7 +59,7 @@ class RegionBuilder:
                     self.full_map.gcp.gcp,
                 ),
             )
-            wld = Wld(
+            projection = Projection(
                 reg.name,
                 self.full_map.raster.suffix,
                 None,
@@ -68,7 +68,7 @@ class RegionBuilder:
                 name=reg.name,
                 bbox=bbox,
                 raster=raster,
-                wld=wld,
+                projection=projection,
                 beta=None,
                 gcp=gcp,
             )
@@ -84,7 +84,7 @@ class RegionBuilder:
         # todo
         pass
 
-    def save_transform(self):
+    def save_projection(self):
         # todo
         pass
 

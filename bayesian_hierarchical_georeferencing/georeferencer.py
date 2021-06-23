@@ -30,7 +30,7 @@ def georeference(
     )
     region_builder.split_map()
 
-    full_map.wld.save(data_dir)
+    full_map.projection.save(data_dir)
 
 
 if __name__ == '__main__':

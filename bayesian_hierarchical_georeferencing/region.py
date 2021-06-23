@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Mapping
 from pathlib import Path
 
 from PIL import Image
@@ -50,18 +50,18 @@ class GCP:
         self.gcp.to_csv(path / f'region_{self.name}.{self.suffix}.points')
 
 
-class Wld:
+class Projection:
     def __init__(
             self,
             name: str,
             suffix: str,
-            wld: Union[np.ndarray, None],
+            wld: Union[Mapping, None],
     ):
         self.wld = wld
         self.name = name
         self.suffix = suffix
 
-    def save(
+    def to_wld(
             self,
             path: Path,
     ):
@@ -77,14 +77,14 @@ class Region:
             name: str,
             bbox: tuple,
             beta: Union[np.ndarray, None],
-            wld: Wld,
+            projection: Projection,
             raster: Raster,
             gcp: GCP,
     ):
         self.name = name
         self.bbox = bbox
         self.beta = beta
-        self.wld = wld
+        self.projection = projection
         self.raster = raster
         self.gcp = gcp
 
@@ -107,7 +107,7 @@ class Region:
             gcp=gcp,
         )
         bbox = 0, 0, image.size[0], image.size[1]
-        wld = Wld(
+        projection = Projection(
             name=name,
             suffix=suffix,
             wld=None,
@@ -119,7 +119,7 @@ class Region:
             gcp=gcp,
             bbox=bbox,
             beta=None,
-            wld=wld,
+            projection=projection,
         )
 
     def to_map(
@@ -127,7 +127,7 @@ class Region:
             path: Path,
     ):
         self.raster.save(path)
-        self.wld.save(path)
+        self.projection.to_wld(path)
         self.gcp.save(path)
 
     def __str__(self):
